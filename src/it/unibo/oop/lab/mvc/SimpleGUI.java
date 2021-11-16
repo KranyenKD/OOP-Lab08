@@ -1,9 +1,21 @@
 package it.unibo.oop.lab.mvc;
 
+import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.Toolkit;
 
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.Iterator;
+
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+
+import it.unibo.oop.lab.iogui.BadIOGUI;
 
 /**
  * A very simple program using a graphical interface.
@@ -11,8 +23,8 @@ import javax.swing.JFrame;
  */
 public final class SimpleGUI {
 
-    private final JFrame frame = new JFrame();
-
+    private final JFrame frame = new JFrame("My GUI");
+    private final Controller ctrl;
     /*
      * Once the Controller is done, implement this class in such a way that:
      * 
@@ -37,8 +49,8 @@ public final class SimpleGUI {
     /**
      * builds a new {@link SimpleGUI}.
      */
-    public SimpleGUI() {
-
+    public SimpleGUI(Controller ctrl) {
+        this.ctrl = ctrl;
         /*
          * Make the frame half the resolution of the screen. This very method is
          * enough for a single screen setup. In case of multiple monitors, the
@@ -53,13 +65,52 @@ public final class SimpleGUI {
         final int sw = (int) screen.getWidth();
         final int sh = (int) screen.getHeight();
         frame.setSize(sw / 2, sh / 2);
-
+        frame.pack();
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        JPanel canvas = new JPanel();
+        JPanel southPn = new JPanel();
+        canvas.setLayout(new BorderLayout());
+        southPn.setLayout(new BoxLayout(southPn, BoxLayout.LINE_AXIS));
+        JTextField text = new JTextField("Insert String");
+        JTextArea area = new JTextArea();
+        area.setEditable(false);
+        JButton print = new JButton("Print");
+        print.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e){
+                // TODO Auto-generated method stub
+                ctrl.setNextString(text.getText());
+                ctrl.printString();
+            }
+        });
+        JButton history = new JButton("Show History");
+        history.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // TODO Auto-generated method stub
+                Iterator<String> iter = ctrl.getHistory().iterator();
+                while(iter.hasNext()){
+                    area.append(iter.next() + " ");
+                }
+            }
+        });
+        southPn.add(print);
+        southPn.add(history);
+        canvas.add(text,BorderLayout.NORTH);
+        canvas.add(area,BorderLayout.CENTER);
+        canvas.add(southPn,BorderLayout.SOUTH);
         /*
          * Instead of appearing at (0,0), upper left corner of the screen, this
          * flag makes the OS window manager take care of the default positioning
          * on screen. Results may vary, but it is generally the best choice.
          */
+        frame.setContentPane(canvas);
         frame.setLocationByPlatform(true);
     }
-
+    void display(){
+        frame.setVisible(true);
+    }
+    public static void main(final String... args) {
+        new SimpleGUI(new UseController()).display();
+     }
 }
